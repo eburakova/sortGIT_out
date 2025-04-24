@@ -79,7 +79,7 @@ target/
 .ipynb_checkpoints
 
 # Streamlit
-webapp/.streamlit
+../.streamlit
 
 # IPython
 profile_default/
