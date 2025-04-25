@@ -1,4 +1,5 @@
 import google.generativeai as genai
+import json
 
 GEMINI_MODEL = "gemini-1.5-flash"
 model = genai.GenerativeModel(GEMINI_MODEL)
@@ -171,9 +172,21 @@ Summarize this difference message:
     else: prompt += f"\n\nPlease provide the summary in English."
     try:
         response = model.generate_content(prompt)
-        if response.parts: return response.text
+        if response.parts:
+            llm_out = response.text
+            json_llm_out = llm_out.replace('```json', '').replace('```', '')
+            out_dict = json.loads(json_llm_out)
+            return out_dict
         elif hasattr(response, 'prompt_feedback') and response.prompt_feedback.block_reason:
              reason = response.prompt_feedback.block_reason.name.replace("_", " ").lower()
-             return None
-        else: return f"Empty/invalid response from AI."
-    except Exception as e: return f"Error generating summary: {e}"
+             out_dict = {'change_type': 'mixed',
+                     'files': [{'path': '[NONE]',
+                       'status': '[NA]',
+                       'language': '[NA]',
+                       'summary': "[NA]"}],
+                     'overall_summary': reason}
+             return out_dict
+        else:
+            return f"Empty/invalid response from AI."
+    except Exception as e:
+        return f"Error generating summary: {e}"

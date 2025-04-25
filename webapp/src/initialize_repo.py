@@ -37,6 +37,7 @@ commit_data = parse_git_log_with_diff(log_output)
 lg.info("Summarizing the commit data with AI")
 print(f"Summarizing the commit data with AI")
 
+# Summarize the differences and commit messages
 for j, commit in enumerate(commit_data):
     commit['summary'] = summarize_commit_message(commit['message'])
     with open(f'../data/{repo_name}_commit_DB.json', 'w') as f:
@@ -44,14 +45,14 @@ for j, commit in enumerate(commit_data):
     for i, _ in enumerate(commit['files_changed']):
         try:
             diff_message = commit['files_changed'][i]['diff']
+            commit['files_changed'][i]['diff_summary'] = summarize_difference(diff_message)
+            lg.info(f"Commit processed: {commit['message']}")
+            print(f"Commit processed: {commit['commit']} \t {commit['message']}")
         except Exception as e:
             print(e)
             commit['files_changed'][i]['diff_summary'] = "No summary available"
-    lg.info(f"Commit processed: {commit['message']}")
-    print(f"Commit processed: {commit['commit']} \t {commit['message']}")
 
 
-# Summarize the differences and commit messages
 with open(f'../data/{repo_name}_commit_DB.json', 'w') as f:
     #f.write(str(commit_data))
     json.dump(commit_data, f, indent=2)
