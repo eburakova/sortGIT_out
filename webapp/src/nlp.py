@@ -1,6 +1,5 @@
 import google.generativeai as genai
 
-
 GEMINI_MODEL = "gemini-1.5-flash"
 model = genai.GenerativeModel(GEMINI_MODEL)
 
@@ -31,6 +30,27 @@ Date: {date_str}
              return f"Could not generate summary for {sha[:7]}. Blocked due to {reason} content."
         else: return f"Could not generate summary for {sha[:7]}. Empty/invalid response from AI."
     except Exception as e: return f"Error generating summary for {sha[:7]}: {e}"
+
+
+def summarize_commit_message(commit_message, commit_hash='', target_language="English"):
+    """Summarizes a commit using the Gemini model and translates if needed."""
+    prompt = f"""
+You are an expert AI assistant specializing in code analysis.
+Analyze and summarize the following Git commit in **simple, non-technical language**.
+Focus on the **what** and **why** of the change, understandable by someone with minimal programming background. Keep the summary concise (2-3 sentences).
+
+Commit Message: {commit_message}
+"""
+    if target_language != "English": prompt += f"\n\nPlease provide the summary exclusively in {target_language}."
+    else: prompt += f"\n\nPlease provide the summary in English."
+    try:
+        response = model.generate_content(prompt)
+        if response.parts: return response.text
+        elif hasattr(response, 'prompt_feedback') and response.prompt_feedback.block_reason:
+             reason = response.prompt_feedback.block_reason.name.replace("_", " ").lower()
+             return f"Could not generate summary for {commit_hash}. Blocked due to {reason} content."
+        else: return f"Could not generate summary for {commit_hash}. Empty/invalid response from AI."
+    except Exception as e: return f"Error generating summary for {commit_hash}: {e}"
 
 def summarize_difference(difference_string, target_language="English"):
     """Summarizes a difference data."""
