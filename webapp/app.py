@@ -41,38 +41,37 @@ except FileNotFoundError:
 
 data_processing_mode = define_processing_mode(commit_data)
 if data_processing_mode == 'Summary':
-    st.write("Running AI in data-saving mode")
+    st.warning("Running AI in data-saving mode: No deep dive into the code changes.")
+    for commit in commit_data:
+        for file in commit['files_changed']:
+            if 'diff' in file:
+                del file['diff']
 if data_processing_mode == 'Full':
-    st.write("Git history is within limits, running AI in with full data.")
+    st.success("Git history is within limits, running AI in with full data.")
 if data_processing_mode == 'Prefilter':
-    st.write("Running AI in extreme data-saving mode (this may impact accuracy! Prefilter the data manually if possible)")
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        search_term = st.text_input("Search commits", placeholder="Search by message, author, or files")
-    with col2:
-        start_date = st.date_input("Start date", value=None)
-    with col3:
-        end_date = st.date_input("End date", value=None)
-    if start_date and end_date:
-        if start_date <= end_date:
-            st.success(f"Selected date range: {start_date} to {end_date}")
-            try:
-                filtered_commits_by_date = [commit for commit in commit_data if
-                                        format_git_time(commit['date']) >= start_date and format_git_time(commit['date']) <= end_date]
-                commit_data = filtered_commits_by_date
-            except TypeError as e:
-                st.error(f"Error: malformatted dates, can't filter {commit_data[0]['date']}, {e}")
-        else:
-            st.error("Error: End date must be after start date")
+    for commit in commit_data:
+        for file in commit['files_changed']:
+            if 'diff' in file:
+                del file['diff']
+    st.warning("Running AI in extreme data-saving mode: No deep dives into the code. (this may impact accuracy! Prefilter the data manually if possible)")
+    st.info("Restricting data to 2000 latest commits")
+    commit_data = commit_data[:2000]
 
 #######
 # Initialize Gemini chat model
 chat = model.start_chat()
 with open('prompts/read_git_summaries_init_llm', 'r') as f:
     init_prompt = f.read()
-
-init_response = chat.send_message(init_prompt)
+    init_response = chat.send_message(init_prompt)
+    if data_processing_mode == 'Full':
+        response = chat.send_message(f"{commit_data}\n")
+    else:
+        try:
+            prompt_commit_data = (f"{format_commit_data(commit_data)}\n\n")
+            response = chat.send_message(prompt_commit_data)
+        except:
+            prompt_commit_data = (f"Commit history is too large, here are only the latest commits.\n {format_commit_data(commit_data)[:1000000]}\n\n")
+            response = chat.send_message(prompt_commit_data)
 
 with st.form(key="question_form", clear_on_submit=True):
     question = st.text_input("Ask a question", placeholder="e.g., What changed recently?")
@@ -87,11 +86,20 @@ if submit_button and question:
     with st.spinner("Thinking..."):
         # Your existing code for processing the question
         prompt = (
-            f"{format_commit_data(commit_data)}\n\n"
+            #f"{format_commit_data(commit_data)}\n\n"
             f"User question: {question}\n"
             f"Only answer based on the commit summaries and metadata. Use commonly known language understandable by non-technical stakeholders"
         )
-        response = chat.send_message(prompt)
+        try:
+            response = chat.send_message(prompt)
+        except:
+            prompt = (
+                #f"{format_commit_data(commit_data)[:1500000]}\n\n"
+                f"User question: {question}\n"
+                f"Only answer based on the commit summaries and metadata. Use commonly known language understandable by non-technical stakeholders. You have only the very latest commits, not the whole repo."
+            )
+            response = chat.send_message(prompt)
+
     st.success("AI Response")
     st.write(response.text)
 else:

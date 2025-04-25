@@ -53,18 +53,33 @@ if commit_data:
     # Create filtered data for display
     filtered_commits = []
     for commit in commit_data:
+        for file in commit['files_changed']:
+            if 'diff' in file:
+                del file['diff']
+    for commit in commit_data:
         # Apply search filter if provided
         if search_term and (search_term.lower() not in json.dumps(commit).lower()):
             continue
-
+        overall_summaries = [
+            file['diff_summary']['overall_summary']
+            for file in commit['files_changed']
+         if 'diff_summary' in file and 'overall_summary' in file['diff_summary']
+        ]
         # Add to filtered list
         filtered_commits.append({
-            "Hash": commit["commit"][:7],
+            "ID": commit["commit"][:7],
             "Author": commit["author"],
             "Date": commit["date"],
-            "Summary": commit.get("summary", "No summary available")
+            "Commit msg": commit["message"],
+            'Codechange summary': ' \n'.join(overall_summaries),
+            #"Summary": commit.get("file_changes", [{"diff_summary": {"overall_summary": "No code based summary"}}])[0]['diff_summary'].get("overall_summary", 'No code-based summary') if commit.get("file_changed", False) else commit.get("summary", "No summary available"),
         })
+        try:
+            st.write(commit['file_changes'])
+        except:
+            pass
 
+    #st.write(filtered_commits)
     # Display the commits
     st.write(f"Showing {len(filtered_commits)} of {len(commit_data)} commits")
     st.dataframe(filtered_commits)
@@ -72,7 +87,7 @@ if commit_data:
     # Commit details section
     st.subheader("Commit Details")
     selected_hash = st.selectbox("Select commit to view details",
-                                 options=[c["Hash"] for c in filtered_commits])
+                                 options=[c["ID"] for c in filtered_commits])
 
     # Find and display the selected commit details
     for commit in commit_data:
