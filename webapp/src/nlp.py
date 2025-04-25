@@ -1,5 +1,6 @@
 import google.generativeai as genai
 import json
+import streamlit as st
 
 GEMINI_MODEL = "gemini-1.5-flash"
 model = genai.GenerativeModel(GEMINI_MODEL)
@@ -201,8 +202,8 @@ def summarize_commit_info(commit_data, cache_path):
             try:
                 diff_message = commit['files_changed'][i]['diff']
                 commit['files_changed'][i]['diff_summary'] = _summarize_difference(diff_message)
-                print(f"File processed: {commit['files_changed'][i]['file']} \t {commit['message']}")
             except Exception as e:
-                print(e)
+                st.warning(f"No summary available for {commit['commit']}")
                 commit['files_changed'][i]['diff_summary'] = "No summary available"
+        st.markdown(f"`Commit processed: {commit['commit']} \t {commit['message']}`")
     return commit_data

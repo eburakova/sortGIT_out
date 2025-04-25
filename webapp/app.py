@@ -1,8 +1,6 @@
 import os
 import streamlit as st
 import google.generativeai as genai
-import json
-from datetime import datetime
 from src.utils import load_commit_data, format_commit_data
 
 # Set page configuration
@@ -28,8 +26,8 @@ st.sidebar.title("💬 AI Git Assistant")
 
 # Home page chat functionality
 repo_name = st.sidebar.text_input("Repository name", value="ChefTreffHackFIChallenge")
-question = st.text_input("Ask a question", placeholder="e.g., What changed recently?")
-ask_button = st.sidebar.button("Ask")
+#question = st.text_input("Ask a question", placeholder="e.g., What changed recently?")
+#ask_button = st.sidebar.button("Ask")
 json_path = f"data/{repo_name}_commit_DB.json"
 
 # Load commit data (cached)
@@ -47,9 +45,18 @@ with open('prompts/read_git_summaries_init_llm', 'r') as f:
 
 init_response = chat.send_message(init_prompt)
 
-# Handle user question
-if ask_button and question:
+with st.form(key="question_form", clear_on_submit=True):
+    question = st.text_input("Ask a question", placeholder="e.g., What changed recently?")
+    submit_button = st.form_submit_button("Ask", use_container_width=True)
+
+    # You can hide the submit button if you want to rely solely on Enter key
+    # To hide it, use CSS:
+    st.markdown("""<style>.stButton button {display: none;}</style>""", unsafe_allow_html=True) # Consider to fix
+
+# Then replace your if statement with this:
+if submit_button and question:
     with st.spinner("Thinking..."):
+        # Your existing code for processing the question
         prompt = (
             f"{format_commit_data(commit_data)}\n\n"
             f"User question: {question}\n"
