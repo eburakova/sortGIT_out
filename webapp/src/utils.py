@@ -2,16 +2,32 @@ import subprocess
 import streamlit as st
 import json
 from datetime import datetime
+import os
 
-def get_git_log_with_diff(PATH_TO_ROOT):
-    result = subprocess.run(
-        ['git', 'log', '-p', '--no-color'],
-        cwd=PATH_TO_ROOT,
-        capture_output=True,
-        text=True,
-        check=True
-    )
-    return result.stdout
+def get_git_log_with_diff(repo_path, max_commits=None):
+    env = os.environ.copy()
+    env["LC_ALL"] = "C.UTF-8"
+
+    cmd = ["git", "-C", repo_path, "log", "-p", "--date=local"]
+    if max_commits:
+        cmd.append(f"-{max_commits}")
+
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=False,
+            env=env
+        )
+
+        if result.returncode != 0:
+            error_message = result.stderr.decode('utf-8', errors='replace')
+            raise Exception(f"Git command failed: {error_message}")
+
+        return result.stdout.decode('utf-8', errors='replace')
+    except Exception as e:
+        # Log the error and handle gracefully
+        return f"Error retrieving git log: {str(e)}"
 
 @st.cache_data
 def load_commit_data(filepath: str):

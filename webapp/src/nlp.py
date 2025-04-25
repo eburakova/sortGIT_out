@@ -205,5 +205,5 @@ def summarize_commit_info(commit_data, cache_path):
             except Exception as e:
                 st.warning(f"No summary available for {commit['commit']}")
                 commit['files_changed'][i]['diff_summary'] = "No summary available"
-        st.markdown(f"`Commit processed: {commit['commit']} \t {commit['message']}`")
+        st.markdown(f"```Commit processed: {commit['commit']} \t {commit['message']}```")
     return commit_data
