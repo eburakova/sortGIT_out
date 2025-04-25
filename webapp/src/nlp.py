@@ -4,7 +4,7 @@ import json
 GEMINI_MODEL = "gemini-1.5-flash"
 model = genai.GenerativeModel(GEMINI_MODEL)
 
-def summarize_commit(commit_info, target_language="English"):
+def _summarize_commit(commit_info, target_language="English"):
     """Summarizes a commit using the Gemini model and translates if needed."""
     author_info = commit_info.get('author', {})
     commit_message = commit_info.get('message', 'N/A')
@@ -33,7 +33,7 @@ Date: {date_str}
     except Exception as e: return f"Error generating summary for {sha[:7]}: {e}"
 
 
-def summarize_commit_message(commit_message, commit_hash='', target_language="English"):
+def _summarize_commit_message(commit_message, commit_hash='', target_language="English"):
     """Summarizes a commit using the Gemini model and translates if needed."""
     prompt = f"""
 You are an expert AI assistant specializing in code analysis.
@@ -53,7 +53,7 @@ Commit Message: {commit_message}
         else: return f"Could not generate summary for {commit_hash}. Empty/invalid response from AI."
     except Exception as e: return f"Error generating summary for {commit_hash}: {e}"
 
-def summarize_difference(difference_string, target_language="English"):
+def _summarize_difference(difference_string, target_language="English"):
     """Summarizes a difference data."""
     prompt = """
 You are an expert AI assistant specializing in code analysis. You will get a file of this format:
@@ -190,3 +190,19 @@ Summarize this difference message:
             return f"Empty/invalid response from AI."
     except Exception as e:
         return f"Error generating summary: {e}"
+
+
+def summarize_commit_info(commit_data, cache_path):
+    for j, commit in enumerate(commit_data):
+        commit['summary'] = _summarize_commit_message(commit['message'])
+        with open(cache_path, 'w') as f:
+            json.dump(commit_data, f, indent=2)
+        for i, _ in enumerate(commit['files_changed']):
+            try:
+                diff_message = commit['files_changed'][i]['diff']
+                commit['files_changed'][i]['diff_summary'] = _summarize_difference(diff_message)
+                print(f"File processed: {commit['files_changed'][i]['file']} \t {commit['message']}")
+            except Exception as e:
+                print(e)
+                commit['files_changed'][i]['diff_summary'] = "No summary available"
+    return commit_data
