@@ -196,8 +196,6 @@ Summarize this difference message:
 def summarize_commit_info(commit_data, cache_path):
     for j, commit in enumerate(commit_data):
         commit['summary'] = _summarize_commit_message(commit['message'])
-        with open(cache_path, 'w') as f:
-            json.dump(commit_data, f, indent=2)
         for i, _ in enumerate(commit['files_changed']):
             try:
                 diff_message = commit['files_changed'][i]['diff']
@@ -205,5 +203,7 @@ def summarize_commit_info(commit_data, cache_path):
             except Exception as e:
                 st.warning(f"No summary available for {commit['commit']}")
                 commit['files_changed'][i]['diff_summary'] = "No summary available"
+        with open(cache_path, 'w') as f:
+            json.dump(commit_data, f, indent=2)
         st.markdown(f"```Commit processed: {commit['commit']} \t {commit['message']}```")
     return commit_data

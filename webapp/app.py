@@ -1,8 +1,9 @@
 import os
 import streamlit as st
 import google.generativeai as genai
-from src.utils import load_commit_data, format_commit_data
+from src.utils import load_commit_data, format_commit_data, format_git_time
 
+from src.sanity_checks import define_processing_mode
 # Set page configuration
 st.set_page_config(page_title="Git Repo AI Assistant", layout="wide")
 
@@ -38,6 +39,34 @@ except FileNotFoundError:
     st.write(f"Current working directory: {os.getcwd()}")
     st.stop()
 
+data_processing_mode = define_processing_mode(commit_data)
+if data_processing_mode == 'Summary':
+    st.write("Running AI in data-saving mode")
+if data_processing_mode == 'Full':
+    st.write("Git history is within limits, running AI in with full data.")
+if data_processing_mode == 'Prefilter':
+    st.write("Running AI in extreme data-saving mode (this may impact accuracy! Prefilter the data manually if possible)")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        search_term = st.text_input("Search commits", placeholder="Search by message, author, or files")
+    with col2:
+        start_date = st.date_input("Start date", value=None)
+    with col3:
+        end_date = st.date_input("End date", value=None)
+    if start_date and end_date:
+        if start_date <= end_date:
+            st.success(f"Selected date range: {start_date} to {end_date}")
+            try:
+                filtered_commits_by_date = [commit for commit in commit_data if
+                                        format_git_time(commit['date']) >= start_date and format_git_time(commit['date']) <= end_date]
+                commit_data = filtered_commits_by_date
+            except TypeError as e:
+                st.error(f"Error: malformatted dates, can't filter {commit_data[0]['date']}, {e}")
+        else:
+            st.error("Error: End date must be after start date")
+
+#######
 # Initialize Gemini chat model
 chat = model.start_chat()
 with open('prompts/read_git_summaries_init_llm', 'r') as f:

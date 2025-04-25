@@ -52,8 +52,13 @@ if process_git_history:
     #st.info("Git history for the repository has been processed.")
     st.markdown(f"**The database is saved as** `{APP_DIR}/data/{repo_name}_commit_DB.json`")
 
-
 # CREATE HIGHER-LEVEL SUMMARY
+
+## Embeddings
+#make_embeddings = st.button("Create embeddings?")
+
+#if make_embeddings:
+
 
 
 

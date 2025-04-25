@@ -3,6 +3,21 @@ import streamlit as st
 import json
 from datetime import datetime
 import os
+import re
+
+def format_git_time(time_str):
+    try:
+        dt = datetime.strptime(time_str, "%a %b %d %H:%M:%S %Y %z")
+        #ts_formatted = dt.strftime("%Y-%m-%d %H:%M:%S %z")
+        return dt.date()
+    except ValueError:
+        try:
+            dt = datetime.strptime(time_str, "%a %b %d %H:%M:%S %Y")
+            #ts_formatted = dt.strftime("%Y-%m-%d %H:%M:%S %z")
+            return dt.date()
+        except ValueError:
+            ts_formatted = time_str
+            return ts_formatted
 
 def get_git_log_with_diff(repo_path, max_commits=None):
     env = os.environ.copy()
@@ -43,8 +58,15 @@ def format_commit_data(commits):
     for c in commits:
         time_str = c['date']
         # Parse the string into a datetime object
-        dt = datetime.strptime(time_str, "%a %b %d %H:%M:%S %Y %z")
-        ts_formatted = dt.strftime("%Y-%m-%d %H:%M:%S %z")
+        try:
+            dt = datetime.strptime(time_str, "%a %b %d %H:%M:%S %Y %z")
+            ts_formatted = dt.strftime("%Y-%m-%d %H:%M:%S %z")
+        except ValueError:
+            try:
+                dt = datetime.strptime(time_str, "%a %b %d %H:%M:%S %Y")
+                ts_formatted = dt.strftime("%Y-%m-%d %H:%M:%S %z")
+            except ValueError:
+                ts_formatted = time_str
         try:
             files = ', '.join(c.get('files_changed', []))
         except TypeError:
