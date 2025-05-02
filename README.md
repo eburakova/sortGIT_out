@@ -12,7 +12,7 @@ Explaining GIT history @ CheffTreffHackathon
    - AI base model: Only Gemini is supported.
 ### Other branches
 Do check out solutions by my talented teammates! 
-  - By Hackathon submission: require GitHub API token
+  - Insteadd of the local database, rely on GitHub API
   - Spend more Gemini tokens but work faster than `main`
   - Just as simple and sleek [Streamlit](https://streamlit.io/) UI
 
