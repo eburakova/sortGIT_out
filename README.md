@@ -1,6 +1,8 @@
 # Sort GIT out
 Explaining GIT history @ CheffTreffHackathon 
 
+> Developed in <24 hours on 24-25. Apr 2025
+
 ## Features
 ### `main` (solution by me, @eburakova)
    - Analyses commit messages and difference logs for each file changed in the commit.
@@ -8,7 +10,6 @@ Explaining GIT history @ CheffTreffHackathon
    - The length of history depends on the amount of tokens the LLM is able to process at once.
    - Simple, sleek UI (made with [Streamlit](https://streamlit.io/))
    - AI base model: Only Gemini is supported.
-   - Developed in <24 hours!
 ### Other branches
 Do check out solutions by my talented teammates! 
   - By Hackathon submission: require GitHub API token
