@@ -1,4 +1,4 @@
-# sortGIT_out
+# Sort GIT out
 Explaining GIT history @ CheffTreffHackathon 
 
 ## Features
