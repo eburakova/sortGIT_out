@@ -10,6 +10,8 @@ Explaining GIT history @ CheffTreffHackathon
    - The length of history depends on the amount of tokens the LLM is able to process at once.
    - Simple, sleek UI (made with [Streamlit](https://streamlit.io/))
    - AI base model: Only Gemini is supported.
+![image](https://github.com/user-attachments/assets/71b0fc16-1d97-4936-9aa4-ab8dfe5f8deb)
+
 ### Other branches
 Do check out solutions by my talented teammates! 
   - Insteadd of the local database, rely on GitHub API
