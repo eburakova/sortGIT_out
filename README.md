@@ -25,5 +25,5 @@ Do check out solutions by my talented teammates!
 
 ## Tested on 
 - [Linux kernel repo](https://github.com/torvalds/linux) (20000 latest commits)
-- [phmyzsh](https://github.com/ohmyzsh/ohmyzsh)
+- [ohmyzsh](https://github.com/ohmyzsh/ohmyzsh)
 - Test repos provided by FinanzInformatik team: [Calculator](https://github.com/Bl7tzcrank/ChefTreffHackFIChallenge#) and [Git guidelines](https://github.com/RomuloOliveira/commit-messages-guide/)
